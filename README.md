@@ -22,6 +22,7 @@ This is an open source project that is in pre-alpha. It was originally intended 
 
    - Starts up the vector database as a Docker container
 
+1. [Root folder] [Install volta](https://docs.volta.sh/guide/getting-started) and run `volta pin node@18` to use Node version 18
 1. [Root folder] `yarn install`
 1. [Server folder] `touch .env`
 1. [Server folder] Copy all the values from `.env.example` to `.env`
