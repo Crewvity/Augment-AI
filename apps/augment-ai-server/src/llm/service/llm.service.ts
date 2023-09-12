@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Config } from '@src/config/configuration';
-import { Message as VercelChatMessage } from 'ai';
+import { Message } from 'ai';
 import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import {
   OpenAIAgentTokenBufferMemory,
@@ -20,7 +20,12 @@ import { TextLoader } from 'langchain/document_loaders/fs/text';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { ChatMessageHistory } from 'langchain/memory';
 import { MultiVectorRetriever } from 'langchain/retrievers/multi_vector';
-import { AIMessage, ChatMessage, HumanMessage } from 'langchain/schema';
+import {
+  AIMessage,
+  BaseMessage,
+  ChatMessage,
+  HumanMessage,
+} from 'langchain/schema';
 import { InMemoryStore } from 'langchain/storage/in_memory';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { Calculator } from 'langchain/tools/calculator';
@@ -43,11 +48,15 @@ const CUSTOM_INSTRUCTIONS = `
 - All your code examples should be in Typescript
 `;
 
+const MESSAGES_CACHE_SIZE = 100;
+
 @Injectable()
 export class LlmService {
   private readonly logger = new Logger(LlmService.name);
 
   private retriever: MultiVectorRetriever | undefined;
+
+  private messages: BaseMessage[] = [];
 
   constructor(private readonly config: ConfigService<Config>) {}
 
@@ -61,33 +70,23 @@ export class LlmService {
     this.logger.log(`Initialised LLM and retriever ready`);
   }
 
-  async chat(chatMessages: VercelChatMessage[]): Promise<string> {
+  async chat(message: Message): Promise<string> {
     if (!this.retriever) {
       throw new Error('Retriever not initialised');
     }
 
-    console.log('chatMessage: ', chatMessages);
+    if (message.role !== 'user') {
+      throw new Error('Only user messages can be processed');
+    }
 
-    /**
-     * We represent intermediate steps as system messages for display purposes,
-     * but don't want them in the chat history.
-     */
-    const messages = (chatMessages ?? []).filter(
-      (message: VercelChatMessage) =>
-        message.role === 'user' || message.role === 'assistant',
-    );
-
-    const previousMessages = messages.slice(0, -1);
-    const currentMessageContent = messages[messages.length - 1].content;
+    const newMessage = this.convertMessageToLangChainMessage(message);
 
     const model = new ChatOpenAI({
       modelName: 'gpt-4',
       openAIApiKey: this.config.getOrThrow('OPENAI_API_KEY'),
     });
 
-    const chatHistory = new ChatMessageHistory(
-      previousMessages.map(this.convertVercelMessageToLangChainMessage),
-    );
+    const chatHistory = new ChatMessageHistory(this.messages);
 
     /**
      * This is a special type of memory specifically for conversational
@@ -130,8 +129,13 @@ export class LlmService {
     });
 
     const result = await executor.call({
-      input: currentMessageContent,
+      input: newMessage.content,
     });
+
+    this.messages.push(newMessage);
+    if (this.messages.length > MESSAGES_CACHE_SIZE) {
+      this.messages.shift();
+    }
 
     return result.output;
   }
@@ -240,9 +244,7 @@ export class LlmService {
     return retriever;
   }
 
-  private convertVercelMessageToLangChainMessage = (
-    message: VercelChatMessage,
-  ) => {
+  private convertMessageToLangChainMessage = (message: Message) => {
     if (message.role === 'user') {
       return new HumanMessage(message.content);
     } else if (message.role === 'assistant') {

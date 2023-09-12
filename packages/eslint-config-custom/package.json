@@ -4,16 +4,21 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "eslint": "^7.23.0",
+    "eslint": "^8.49.0",
     "eslint-config-next": "13.0.0",
     "eslint-config-prettier": "^8.3.0",
+    "eslint-config-turbo": "latest",
     "eslint-plugin-react": "7.31.8",
-    "eslint-config-turbo": "latest"
+    "lint-staged": "^13.1.2",
+    "turbo": "^1.10.3"
   },
   "devDependencies": {
     "typescript": "^4.7.4"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "volta": {
+    "node": "18.17.1"
   }
 }

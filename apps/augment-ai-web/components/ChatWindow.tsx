@@ -4,7 +4,7 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { useChat } from "ai/react";
+import { Message, useChat } from "ai/react";
 import type { FormEvent } from "react";
 import { ReactElement, useRef, useState } from "react";
 
@@ -42,7 +42,7 @@ export function ChatWindow(props: {
           theme: "dark",
         });
       },
-    },
+    }
   );
 
   async function sendMessage(e: FormEvent<HTMLFormElement>) {
@@ -55,26 +55,25 @@ export function ChatWindow(props: {
     }
 
     setInput("");
-    const messagesWithUserReply = messages.concat({
+    const newMessage: Message = {
       id: messages.length.toString(),
       content: input,
       role: "user",
-    });
+    };
+    const messagesWithUserReply = [...messages, newMessage];
     setMessages(messagesWithUserReply);
 
     try {
       setAiResponding(true);
       const response = await axios.post(endpoint, {
-        messages: messagesWithUserReply,
-        show_intermediate_steps: true,
+        message: newMessage,
       });
       const json = response.data;
       if (response.status >= 200 && response.status < 300) {
-        const newMessages = messagesWithUserReply;
         setMessages([
-          ...newMessages,
+          ...messagesWithUserReply,
           {
-            id: newMessages.length.toString(),
+            id: messagesWithUserReply.length.toString(),
             content: json.output,
             role: "assistant",
           },
