@@ -8,8 +8,8 @@ export default function Home() {
         <li className="text-l">
           🚀
           <span className="ml-2">
-            Augment the OpenAI's GPT-4 model with your own documents to educate
-            it the way you want.
+            Augment the OpenAI&apos;s GPT-4 model with your own documents to
+            educate it the way you want.
           </span>
         </li>
         <li className="text-l">
@@ -43,8 +43,8 @@ export default function Home() {
         <li className="text-l">
           📖
           <span className="ml-2">
-            Before running this app, you'll first need to set up the backend
-            server properly. See the README for more details.
+            Before running this app, you&apos;ll first need to set up the
+            backend server properly. See the README for more details.
           </span>
         </li>
       </ul>
@@ -53,7 +53,6 @@ export default function Home() {
 
   return (
     <ChatWindow
-      endpoint={`${process.env.NEXT_PUBLIC_SERVER_BASE_URL}/llm/chat`}
       emptyStateComponent={InfoCard}
       placeholder={"Send a message"}
       emoji="🤖"

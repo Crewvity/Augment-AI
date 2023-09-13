@@ -16,17 +16,18 @@ export function ChatMessageBubble(props: {
     props.message.role === "user" ? "ml-auto" : "mr-auto";
   const prefix = props.message.role === "user" ? "🧑" : props.aiEmoji;
 
+  console.log("&&& chatMessageBubble: ", props.message.content);
+
   return (
     <div
       className={`${alignmentClassName} ${colorClassName} rounded px-4 py-2 max-w-[80%] mb-8 flex`}
     >
-      <div className="mr-2">{prefix}</div>
-      <div className="whitespace-pre-wrap">
+      <div className="mr-2 pt-2">{prefix}</div>
+      <div>
         <ReactMarkdown
           components={{
             code({ node, inline, className, children, ...props }) {
               const match = /language-(\w+)/.exec(className || "");
-              console.log("match: ", match);
               return !inline && match ? (
                 <SyntaxHighlighter
                   language={match[1]}

@@ -46,6 +46,7 @@ const CUSTOM_INSTRUCTIONS = `
   - noImplicitAny is enabled
   - Use functional programming style whenever possible
 - All your code examples should be in Typescript
+- Use Github style markdown syntax for text responses while using bullet lists as much as possible for conciseness
 `;
 
 const MESSAGES_CACHE_SIZE = 100;
@@ -140,6 +141,11 @@ export class LlmService {
     return result.output;
   }
 
+  resetChat() {
+    // clear the chat message history
+    this.messages = [];
+  }
+
   private async resetDB() {
     this.logger.log(`Resetting DB`);
     const dataSource = new DataSource({
@@ -181,7 +187,7 @@ export class LlmService {
     const splitParentDocs = await splitter.splitDocuments(parentDocs);
 
     const parentDocIdKey = 'doc_id';
-    const parentDocIds = splitParentDocs.map((_) => uuid.v4());
+    const parentDocIds = splitParentDocs.map(() => uuid.v4());
 
     const childSplitter = new RecursiveCharacterTextSplitter({
       chunkSize: 400,

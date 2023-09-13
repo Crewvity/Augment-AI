@@ -17,4 +17,9 @@ export class LlmController {
     const output = await this.llmService.chat(message);
     return { output };
   }
+
+  @Post('reset-chat')
+  async resetChat() {
+    await this.llmService.resetChat();
+  }
 }

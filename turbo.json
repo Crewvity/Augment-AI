@@ -12,5 +12,6 @@
     "dev": {
       "cache": false
     }
-  }
+  },
+  "globalEnv": ["NEXT_PUBLIC_SERVER_BASE_URL"]
 }
